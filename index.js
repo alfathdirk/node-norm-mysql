@@ -39,12 +39,12 @@ class Mysql extends Connection {
 
   _mysqlQuery (sql, params) {
     return new Promise((resolve, reject) => {
-      this.conn.query(sql, params, (err, result, fields) => {
+      let q = this.conn.query(sql, params, (err, result, fields) => {
         if (err) {
           return reject(err);
         }
 
-        resolve({ result, fields });
+        resolve({ result, fields, queryString: q.sql });
       });
     });
   }
@@ -124,8 +124,7 @@ class Mysql extends Connection {
     let orderBys = [];
     for (let key in query._sorts) {
       let val = query._sorts[key];
-
-      orderBys.push(`${mysql.escapeId(key)} ${val ? 'ASC' : 'DESC'}`);
+      orderBys.push(`${mysql.escapeId(key)} ${val || 'ASC'}`);
     }
 
     if (!orderBys.length) {
@@ -172,7 +171,6 @@ class Mysql extends Connection {
   }
 
   begin () {
-    console.log('begin');
     return new Promise((resolve, reject) => {
       this.conn.beginTransaction(err => {
         if (err) {
@@ -184,7 +182,6 @@ class Mysql extends Connection {
   }
 
   commit () {
-    console.log('commit');
     return new Promise((resolve, reject) => {
       this.conn.commit(err => {
         if (err) {
@@ -196,7 +193,6 @@ class Mysql extends Connection {
   }
 
   rollback () {
-    console.log('rollback');
     return new Promise((resolve, reject) => {
       this.conn.rollback(err => {
         if (err) {
